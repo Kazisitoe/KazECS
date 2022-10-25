@@ -1,0 +1,17 @@
+{
+    "name": "kazECSTest",
+    "tree": {
+        "$className": "DataModel",
+        "ServerScriptService": {
+            "KazECS": {
+                "$path": "lib"
+            },
+            "Test": {
+                "$path": "Test.server.lua",
+                "Packages": {
+                    "$path": "Packages"
+                }
+            }
+        }
+    }
+}
