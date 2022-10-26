@@ -2,6 +2,7 @@ local KazECS = require(script.Parent)
 local Components = KazECS.Components
 local World = KazECS.World
 local Systems = KazECS.Systems
+local History = require(script.Parent.History)
 
 return function()
     describe("Systems", function()
@@ -32,6 +33,18 @@ return function()
             expect(RoleCalls).never.to.throw()
 
             local function MassGenocide()
+                task.spawn(function()
+                    for _ = 1, 4 do
+                        for Id, HumanoidChanges in World:QueryChanged(Components.Humanoid) do
+                            print(HumanoidChanges.New.Alive and tostring(Id).." is now alive!" or tostring(Id).." has been killed!")
+                        end
+                        
+                        task.wait(1)
+
+                    end
+
+                end)
+
                 for Id in World:Query(Components.Far, Components.Humanoid) do
                     print("Murdered", Id)
 
