@@ -8,10 +8,9 @@ function Systems:RegisterEvent(Name:string, Event:RBXScriptSignal)
     if self.System[Name] then self.Systems[Name]:Disconnect() end
 
     self.Events[Name] = Event
-    Event:Connect(function(...)
+    self.Systems[Name] = Event:Connect(function(...)
         for _, System in next, self.Systems[Name] do System(...) end
     end)
-    self.Systems[Name] = {}
 
 end
 
@@ -21,9 +20,9 @@ function Systems:AddSystem(Event:string?, System:(...any)->any?, Priority:number
         Event = "DEFAULT"
     end
 
-    if not self.Systems[Event] then error("Attempted to bind system to a nonexistent event") end
+    if not self.Events[Event] then error("Attempted to bind system to a nonexistent event") end
 
-    table.insert(self.Systems[Event], Priority, Systems)
+    table.insert(self.Systems[Event], Priority, System)
 
 end
 
