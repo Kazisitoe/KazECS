@@ -87,9 +87,15 @@ end
 
 function History:SetChanged(ComponentName:string, Id:number, IsChanged:boolean)
     local Name = ("%s:%s"):format(debug.info(3, "sl"))
-    self.Cache[Name][ComponentName][Id]._Changed = IsChanged
+    local Record = self.Cache[Name][ComponentName][Id]
+    if not IsChanged and not Record.New then
+        self.Cache[Name][ComponentName][Id] = nil
+
+        return
+
+    end
+    Record._Changed = IsChanged
 
 end
-
 
 return History

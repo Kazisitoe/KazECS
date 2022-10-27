@@ -1,7 +1,7 @@
 --|| KAZI
 
 --// VARIABLES \\--
-local World = { _NextId = 1, TotalEntities = 0, AllEntities = {} }
+local World = { _NextId = 1, CreatedEntities = 0, }
 local Entities = require(script.Parent.Entities)
 local History = require(script.Parent.History)
 local ComponentHandler = require(script.Parent.Components)
@@ -14,12 +14,13 @@ function World:Spawn(...)
         local Name = Component._NAME
         Entities[Name][self._NextId] = Component
         History:AddToHistory(Name, self._NextId, Component)
+        print(History.Cache)
 
     end
 
+    self.CreatedEntities = self.CreatedEntities + 1 == self._NextId and self.CreatedEntities + 1 or self.CreatedEntities
     self._NextId += 1
-    self.TotalEntities += 1
-    self.AllEntities[self._NextId-1] = true
+    Entities._EXISTS[self._NextId-1] = true
 
     return self._NextId - 1
 
@@ -27,13 +28,13 @@ end
 
 function World:Despawn(Entity:number)
     for Name, _ in next, ComponentHandler.Components do
+        if not Entities[Name][Entity] then continue end
         Entities[Name][Entity] = nil
-        History:AddToHistory(Name, self._NextId, nil)
+        History:AddToHistory(Name, Entity, nil)
 
     end
 
-    self.AllEntities[Entity] = nil
-    self.TotalEntities -= 1
+    Entities._EXISTS[Entity] = nil
 
     for _, EntityList in next, Entities do
         EntityList[Entity] = nil
@@ -58,7 +59,7 @@ function World:Get(Entity:number, ...)
 end
 
 function World:Insert(Entity:number, ...)
-    if not self.AllEntities[Entity] then self.TotalEntities += 1; self.AllEntities[Entity] = true end
+    if not Entities._EXISTS[Entity] then self.CreatedEntities += 1; Entities._EXISTS[Entity] = true end
 
     local Components = {...}
     for _, Component in next, Components do
@@ -90,9 +91,9 @@ function World:Query(...)
         return function()
             local Output = {}
 
-            while Id < self.TotalEntities do
+            while Id < self.CreatedEntities do
                 Id += 1
-                if not self.AllEntities[Id] then continue end
+                if not Entities._EXISTS[Id] then continue end
 
                 local IsBad = false
                 for _, Component in next, BadComponents do
@@ -122,9 +123,9 @@ function World:Query(...)
     return setmetatable({ Without = Without }, {__call = function()
         local Output = {}
 
-        while Id < self.TotalEntities do
+        while Id < self.CreatedEntities do
             Id += 1
-            if not self.AllEntities[Id] then continue end
+            if not Entities._EXISTS[Id] then continue end
 
             for Idx, Component in next, Components do
                 local Data = Entities[Component._NAME][Id]
@@ -149,6 +150,7 @@ function World:QueryChanged(MainComponent, ...)
     local OtherComponents = {...}
     local Amount = #OtherComponents
     local ComponentName = MainComponent._NAME
+    History:CreateHistory(ComponentName)
 
     local function Without(self2, ...)
         local BadComponents = {...}
@@ -156,9 +158,8 @@ function World:QueryChanged(MainComponent, ...)
         return function()
             local Output = {}
 
-            while Id < self.TotalEntities do
+            while Id < self.CreatedEntities do
                 Id += 1
-                if not self.AllEntities[Id] then continue end
 
                 local Changes = History:GetHistory(ComponentName, Id)
                 if not Changes._Changed then continue end
@@ -190,9 +191,8 @@ function World:QueryChanged(MainComponent, ...)
     return setmetatable({ Without = Without }, {__call = function()
         local Output = {}
 
-        while Id < self.TotalEntities do
+        while Id < self.CreatedEntities do
             Id += 1
-            if not self.AllEntities[Id] then continue end
 
             local Changes = History:GetHistory(MainComponent._NAME, Id)
             if not Changes._Changed then continue end

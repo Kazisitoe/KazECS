@@ -1,6 +1,6 @@
 [package]
 name = "kazisitoe/kazecs"
-version = "0.1.4"
+version = "0.1.5"
 registry = "https://github.com/UpliftGames/wally-index"
 description = "A simple ECS system made by Kazisito"
 realm = "shared"
