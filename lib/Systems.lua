@@ -1,16 +1,17 @@
 --|| KAZI
 
 --// VARIABLES \\--
-local Systems = { Events = { DEFAULT = game:GetService("RunService").Heartbeat }, Systems = {} }
+local Systems = { Events = { DEFAULT = game:GetService("RunService").Heartbeat }, Systems = { DEFAULT = {} } }
 
 --// SYSTEMS \\--
 function Systems:RegisterEvent(Name:string, Event:RBXScriptSignal)
     if self.System[Name] then self.Systems[Name]:Disconnect() end
 
     self.Events[Name] = Event
-    self.Systems[Name] = Event:Connect(function(...)
+    Event:Connect(function(...)
         for _, System in next, self.Systems[Name] do System(...) end
     end)
+    self.Systems[Name] = {}
 
 end
 
