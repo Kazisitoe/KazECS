@@ -4,6 +4,7 @@
 local World = { _NextId = 1, TotalEntities = 0, AllEntities = {} }
 local Entities = require(script.Parent.Entities)
 local History = require(script.Parent.History)
+local ComponentHandler = require(script.Parent.Components)
 
 --// WORLD \\--
 function World:Spawn(...)
@@ -12,6 +13,7 @@ function World:Spawn(...)
     for _, Component in next, Components do
         local Name = Component._NAME
         Entities[Name][self._NextId] = Component
+        History:AddToHistory(Name, self._NextId, Component)
 
     end
 
@@ -24,6 +26,12 @@ function World:Spawn(...)
 end
 
 function World:Despawn(Entity:number)
+    for Name, _ in next, ComponentHandler.Components do
+        Entities[Name][Entity] = nil
+        History:AddToHistory(Name, self._NextId, nil)
+
+    end
+
     self.AllEntities[Entity] = nil
     self.TotalEntities -= 1
 
