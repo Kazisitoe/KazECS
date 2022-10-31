@@ -1,10 +1,11 @@
 --|| KAZI
 
 --// VARIABLES \\--
-local World = { _NextId = 1, CreatedEntities = 0, }
+local World = { _NextId = 1, CreatedEntities = 0, _Changed = require(script.Parent.Event).new() }
 local Entities = require(script.Parent.Entities)
 local History = require(script.Parent.History)
 local ComponentHandler = require(script.Parent.Components)
+World._Changed:Fire("START")
 
 --// WORLD \\--
 function World:Spawn(...)
@@ -21,6 +22,8 @@ function World:Spawn(...)
     self.CreatedEntities = self.CreatedEntities + 1 == self._NextId and self.CreatedEntities + 1 or self.CreatedEntities
     self._NextId += 1
     Entities._EXISTS[self._NextId-1] = true
+
+    self._Changed:Fire("Spawn", self._NextId - 1, ...)
 
     return self._NextId - 1
 
@@ -39,8 +42,9 @@ function World:Despawn(Entity:number)
     for _, EntityList in next, Entities do
         EntityList[Entity] = nil
     end
-
+    
     self._NextId = Entity
+    self._Changed:Fire("Despawn", Entity)
     
 end
 
@@ -68,6 +72,8 @@ function World:Insert(Entity:number, ...)
 
     end
     
+    self._Changed:Fire("Insert", Entity)
+    
 end
 
 function World:QuickPatch(Entity:number, ...)
@@ -77,6 +83,8 @@ function World:QuickPatch(Entity:number, ...)
         History:AddToHistory(Component._NAME, Entity, Entities[Component._NAME][Entity])
 
     end
+    
+    self._Changed:Fire("Insert", Entity)
 
 end
 
