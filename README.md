@@ -6,10 +6,10 @@
 ``World`` - Singleton class that contains and manages all entities
 
 ``World:Query(...Components): EntityIterator`` - Returns an iterator function that iterates over every entity with the given components
-``EntityIterator(): Number, ...Component``
+``EntityIterator(): Number, ...Component`` (Entity Iterator)
 ``EntityIterator:Without(...Components): EntityIterator`` - Returns a near-identical iterator function that skips the given components
 ``World:QueryChanged(ChangedComponent, ...Components): EntityRecordIterator`` - Returns an iterator function that iterates over every entity with the given components that experienced a change with the first component provided
-``EntityRecordIterator(): Number, {New: Component, Old:Component}``
+``EntityRecordIterator(): Number, {New: Component, Old:Component}`` (Entity Record Iterator)
 ``EntityRecordIterator:Without(...Components): EntityRecordIterator`` - Returns a near-identical iterator function that skips the given components
 
 ## Installation
