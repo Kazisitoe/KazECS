@@ -5,11 +5,22 @@ local Components = { Components = {} }
 local ComponentClass = {}
 local Entities = require(script.Parent.Entities)
 
+--// TYPES \\--
+export type ComponentInfo = { Name:string, OnGet:()->any, }
+export type ComponentGetterContext = "GET" | "CREATE"
+
 --// COMPONENTS \\--
-function Components.new(Name)
-    Components.Components[Name] = setmetatable({_NAME = Name}, {__call = function(_, Data:table?)
+function Components.new(Info:string | ComponentInfo)
+    local IsOnlyName = typeof(Info) == "string"
+    local Name:string = IsOnlyName and Info or Info.Name
+    local Getter = IsOnlyName and function(self, Id, Context:ComponentGetterContext)
+        return Context == "GET" and self or Id
+    end or Info.OnGet
+
+    Components.Components[Name] = setmetatable({_NAME = Name, _ON_GET = Getter}, {__call = function(_, Data:table?)
         Data = Data or {}
         Data._NAME = Name
+        Data._ON_GET = Getter
         
         return table.freeze(setmetatable(Data, {__index = ComponentClass}))
 

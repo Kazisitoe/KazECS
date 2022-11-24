@@ -11,11 +11,15 @@ World._Changed:Fire("START")
 function World:Spawn(...)
     local Components = {...}
     
+    local Output = {}
     for _, Component in next, Components do
         local Name = Component._NAME
         Entities[Name][self._NextId] = Component
         History:AddToHistory(Name, self._NextId, Component)
-        print(History.Cache)
+        for _, v in next, {Component:_ON_GET(self._NextId, "CREATE")} do
+            print(v)
+            Output[#Output+1] = v
+        end
 
     end
 
@@ -25,7 +29,7 @@ function World:Spawn(...)
 
     self._Changed:Fire("Spawn", self._NextId - 1, ...)
 
-    return self._NextId - 1
+    return unpack(Output)
 
 end
 
@@ -53,12 +57,25 @@ function World:Get(Entity:number, ...)
     local Output = {}
     
     for Idx, Component in next, Components do
-        Output[Idx] = Entities[Component._NAME][Entity]
+        Output[Idx] = Entities[Component._NAME][Entity]:_ON_GET(Entity, "GET")
         if not Output[Idx] then return nil end
 
     end
 
     return unpack(Output)
+
+end
+
+function World:GetComponents(Entity:number)
+    local Components = {}
+    
+    for Name, _ in next, ComponentHandler.Components do
+        if not Entities[Name][Entity] then continue end
+        Components[Name] = Entities[Name][Entity]
+
+    end
+
+    return Components
 
 end
 
