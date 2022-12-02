@@ -5,7 +5,7 @@ local World = { _NextId = 1, CreatedEntities = 0, _Changed = require(script.Pare
 local Entities = require(script.Parent.Entities)
 local History = require(script.Parent.History)
 local ComponentHandler = require(script.Parent.Components)
-World._Changed:Fire("START")
+World._Changed:HardFire("START")
 
 --// WORLD \\--
 function World:Spawn(...)
@@ -17,17 +17,16 @@ function World:Spawn(...)
         Entities[Name][self._NextId] = Component
         History:AddToHistory(Name, self._NextId, Component)
         for _, v in next, {Component:_ON_GET(self._NextId, "CREATE")} do
-            print(v)
             Output[#Output+1] = v
         end
 
     end
 
     self.CreatedEntities = self.CreatedEntities + 1 == self._NextId and self.CreatedEntities + 1 or self.CreatedEntities
+    Entities._EXISTS[self._NextId] = true
     self._NextId += 1
-    Entities._EXISTS[self._NextId-1] = true
 
-    self._Changed:Fire("Spawn", self._NextId - 1, ...)
+    self._Changed:HardFire("Spawn", self._NextId, ...)
 
     return unpack(Output)
 
@@ -47,8 +46,7 @@ function World:Despawn(Entity:number)
         EntityList[Entity] = nil
     end
     
-    self._NextId = Entity
-    self._Changed:Fire("Despawn", Entity)
+    self._Changed:HardFire("Despawn", Entity)
     
 end
 
@@ -89,7 +87,7 @@ function World:Insert(Entity:number, ...)
 
     end
     
-    self._Changed:Fire("Insert", Entity)
+    self._Changed:HardFire("Insert", Entity)
     
 end
 
@@ -101,7 +99,7 @@ function World:QuickPatch(Entity:number, ...)
 
     end
     
-    self._Changed:Fire("Insert", Entity)
+    self._Changed:HardFire("Insert", Entity)
 
 end
 
