@@ -91,7 +91,7 @@ function World:Insert(Entity:number, ...)
     
 end
 
-function World:QuickPatch(Entity:number, ...)
+function World:Patch(Entity:number, ...)
     local Components = {...}
     for _, Component in next, Components do
         Entities[Component._NAME][Entity] = Entities[Component._NAME][Entity]:Patch(Component)
