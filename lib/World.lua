@@ -50,6 +50,11 @@ function World:Despawn(Entity:number)
     
 end
 
+function World:Exists(Entity:number)
+    return Entities._EXISTS[Entity]
+    
+end
+
 function World:Get(Entity:number, ...)
     local Components = {...}
     local Output = {}
